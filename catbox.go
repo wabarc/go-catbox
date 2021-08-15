@@ -11,6 +11,7 @@ import (
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"time"
@@ -40,12 +41,21 @@ func New(client *http.Client) *Catbox {
 	}
 }
 
+// Upload file or URI to the Catbox. It returns an URL string and error.
 func (cat *Catbox) Upload(path string) (string, error) {
+	parse := func(s string, _ error) (string, error) {
+		uri, err := url.Parse(s)
+		if err != nil {
+			return "", err
+		}
+		return uri.String(), nil
+	}
+
 	switch {
 	case helper.IsURL(path):
-		return cat.urlUpload(path)
+		return parse(cat.urlUpload(path))
 	case helper.Exists(path):
-		return cat.fileUpload(path)
+		return parse(cat.fileUpload(path))
 	default:
 		return "", errors.New(`path invalid`)
 	}
@@ -98,12 +108,12 @@ func (cat *Catbox) fileUpload(path string) (string, error) {
 	return string(body), nil
 }
 
-func (cat *Catbox) urlUpload(url string) (string, error) {
+func (cat *Catbox) urlUpload(uri string) (string, error) {
 	b := new(bytes.Buffer)
 	w := multipart.NewWriter(b)
 	w.WriteField("reqtype", "urlupload")
 	w.WriteField("userhash", cat.Userhash)
-	w.WriteField("url", url)
+	w.WriteField("url", uri)
 
 	req, _ := http.NewRequest(http.MethodPost, ENDPOINT, b)
 	req.Header.Add("Content-Type", w.FormDataContentType())
