@@ -27,6 +27,28 @@ func TestFileUpload(t *testing.T) {
 	}
 }
 
+func TestRawUpload(t *testing.T) {
+	content := make([]byte, 5000)
+	tmpfile, err := ioutil.TempFile("", "go-catbox-")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.Remove(tmpfile.Name())
+	b, err := ioutil.ReadFile(tmpfile.Name())
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := tmpfile.Write(content); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := New(nil).RawUpload(b, "test"); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestURLUpload(t *testing.T) {
 	url := "https://www.gstatic.com/webp/gallery/1.webp"
 	if _, err := New(nil).Upload(url); err != nil {

@@ -61,6 +61,41 @@ func (cat *Catbox) Upload(path string) (string, error) {
 	}
 }
 
+func (cat *Catbox) RawUpload(b []byte, name string) (string, error) {
+	r, w := io.Pipe()
+	m := multipart.NewWriter(w)
+
+	go func() {
+		defer w.Close()
+		defer m.Close()
+
+		m.WriteField("reqtype", "fileupload")
+		m.WriteField("userhash", cat.Userhash)
+		part, err := m.CreateFormFile("fileToUpload", filepath.Base(name))
+		if err != nil {
+			return
+		}
+		if _, err = io.Copy(part, bytes.NewBuffer(b)); err != nil {
+			return
+		}
+	}()
+	req, _ := http.NewRequest(http.MethodPost, ENDPOINT, r)
+	req.Header.Add("Content-Type", m.FormDataContentType())
+
+	resp, err := cat.Client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	return string(body), nil
+}
+
 func (cat *Catbox) fileUpload(path string) (string, error) {
 	file, err := os.Open(path)
 	if err != nil {
@@ -69,7 +104,7 @@ func (cat *Catbox) fileUpload(path string) (string, error) {
 	defer file.Close()
 
 	if size := helper.FileSize(path); size > 209715200 {
-		return "", fmt.Errorf("File too large, size: %d MB", size/1024/1024)
+		return "", fmt.Errorf("file too large, size: %d MB", size/1024/1024)
 	}
 
 	r, w := io.Pipe()
