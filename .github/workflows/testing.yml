@@ -18,6 +18,9 @@ on:
       - "go.sum"
       - ".github/workflows/testing.yml"
 
+env:
+  MallocNanoZone: 0
+
 jobs:
   test:
     name: Testing
