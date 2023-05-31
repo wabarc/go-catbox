@@ -15,7 +15,7 @@ go get -u github.com/wabarc/go-catbox/cmd/catbox
 From [gobinaries.com](https://gobinaries.com):
 
 ```sh
-$ curl -sf https://gobinaries.com/wabarc/go-catbox | sh
+curl -sf https://gobinaries.com/wabarc/go-catbox | sh
 ```
 
 ## Usage
