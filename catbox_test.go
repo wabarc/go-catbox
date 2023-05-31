@@ -44,7 +44,7 @@ func TestRawUpload(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := New(nil).RawUpload(b, "test"); err != nil {
+	if _, err := New(nil).Upload(b, "test"); err != nil {
 		t.Fatal(err)
 	}
 }

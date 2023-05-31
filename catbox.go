@@ -42,26 +42,39 @@ func New(client *http.Client) *Catbox {
 }
 
 // Upload file or URI to the Catbox. It returns an URL string and error.
-func (cat *Catbox) Upload(path string) (string, error) {
-	parse := func(s string, _ error) (string, error) {
-		uri, err := url.Parse(s)
-		if err != nil {
-			return "", err
-		}
-		return uri.String(), nil
+func (cat *Catbox) Upload(v ...interface{}) (string, error) {
+	if len(v) == 0 {
+		return "", fmt.Errorf(`must specify file path or byte slice`)
 	}
 
-	switch {
-	case helper.IsURL(path):
-		return parse(cat.urlUpload(path))
-	case helper.Exists(path):
-		return parse(cat.fileUpload(path))
-	default:
-		return "", errors.New(`path invalid`)
+	switch t := v[0].(type) {
+	case string:
+		path := t
+		parse := func(s string, _ error) (string, error) {
+			uri, err := url.Parse(s)
+			if err != nil {
+				return "", err
+			}
+			return uri.String(), nil
+		}
+		switch {
+		case helper.IsURL(path):
+			return parse(cat.urlUpload(path))
+		case helper.Exists(path):
+			return parse(cat.fileUpload(path))
+		default:
+			return "", errors.New(`path invalid`)
+		}
+	case []byte:
+		if len(v) != 2 {
+			return "", fmt.Errorf(`must specify file name`)
+		}
+		return cat.rawUpload(t, v[1].(string))
 	}
+	return "", fmt.Errorf(`unhandled`)
 }
 
-func (cat *Catbox) RawUpload(b []byte, name string) (string, error) {
+func (cat *Catbox) rawUpload(b []byte, name string) (string, error) {
 	r, w := io.Pipe()
 	m := multipart.NewWriter(w)
 
