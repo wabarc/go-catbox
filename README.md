@@ -6,10 +6,10 @@
 
 The simplest, cross-platform way is to download from [GitHub Releases](https://github.com/wabarc/go-catbox/releases) and place the executable file in your PATH.
 
-Via Golang package get command
+Via Golang package install command
 
 ```sh
-go get -u github.com/wabarc/go-catbox/cmd/catbox
+go install github.com/wabarc/go-catbox/cmd/catbox@latest                         
 ```
 
 From [gobinaries.com](https://gobinaries.com):
