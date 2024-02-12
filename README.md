@@ -9,7 +9,7 @@ The simplest, cross-platform way is to download from [GitHub Releases](https://g
 Via Golang package install command
 
 ```sh
-go install github.com/wabarc/go-catbox/cmd/catbox@latest                         
+go install github.com/wabarc/go-catbox/cmd/catbox@latest
 ```
 
 From [gobinaries.com](https://gobinaries.com):
